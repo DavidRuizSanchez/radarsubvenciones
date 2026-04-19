@@ -1,0 +1,4 @@
+company_id,name,cif,region,cnae,website,sector_tags,service_focus_tags,preferred_regions,strategic_priority,urgency_level,estimated_ticket_eur,relationship_level,notes
+cli-001,Empresa Demo Madrid 1,,Madrid,,,,digitalizacion;innovacion,madrid,3,3,900,cold,
+cli-002,Empresa Demo Madrid 2,,Madrid,,,,eficiencia energetica,madrid,3,3,900,cold,
+cli-003,Empresa Demo Industria 3,,Castilla y Leon,,,,industria;descarbonizacion,castilla y leon,3,3,900,cold,

@@ -1,0 +1,6 @@
+company_id,name,cif,region,cnae,website,sector_tags,service_focus_tags,preferred_regions,strategic_priority,urgency_level,estimated_ticket_eur,relationship_level,notes
+lead-001,Ingenieria EcoMadrid SL,B86543210,Madrid,7112,https://www.acciona.com/,eficiencia energetica;ingenieria;infraestructura,eficiencia energetica;descarbonizacion,madrid;castilla la mancha,4,3,950,warm,Empresa tipo para ayudas de sostenibilidad
+lead-002,LegalTech Iberia SA,A12345678,Madrid,6201,https://www.indracompany.com/,digitalizacion;software;ia,digitalizacion;innovacion,madrid;valencia,5,4,1200,hot,Proveedor tecnologia para despachos
+lead-003,Fabrica Circular Castilla SL,B99887766,Castilla y Leon,2229,https://www.sacyr.com/,industria;economia circular;descarbonizacion,industria;sostenibilidad,castilla y leon;galicia,3,2,700,cold,Interes en proyectos industriales
+lead-004,Consulting Energia Norte SL,B11223344,Pais Vasco,7022,https://www.repsol.com/,eficiencia energetica;consultoria;innovacion,eficiencia energetica;innovacion,pais vasco;navarra,4,5,1100,warm,Consultoria para energia y eficiencia
+lead-005,Gestoria Innovacion Madrid SL,B55667788,Madrid,6920,https://www.grupoatisa.com/,innovacion;gestoria;pymes,innovacion;digitalizacion,madrid,5,5,900,existing_client,Target directo para pruebas comerciales

@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ai-income-snapshot"
+version = "0.1.0"
+description = "Radar de Capital Publico: deteccion de oportunidades de subvenciones y scoring de leads B2B"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "requests>=2.31.0",
+  "flask>=3.0.0",
+]
+
+[project.scripts]
+radar-capital = "ai_income_snapshot.cli:main"
+radar-capital-web = "ai_income_snapshot.web_app:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+ai_income_snapshot = ["templates/*.html"]

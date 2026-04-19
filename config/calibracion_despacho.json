@@ -1,0 +1,60 @@
+{
+  "dispatch_weight": 0.30,
+  "strategic_priority_weight": 0.30,
+  "urgency_weight": 0.20,
+  "ticket_weight": 0.20,
+  "relationship_weight": 0.20,
+  "sector_alignment_weight": 0.10,
+  "target_ticket_min_eur": 750,
+  "target_ticket_max_eur": 1200,
+  "fallback_strategic_priority": 3,
+  "fallback_urgency_level": 3,
+  "only_private_companies": true,
+  "min_estimated_ticket_eur": 500,
+  "allowed_regions": [],
+  "excluded_name_keywords": [
+    "ayuntamiento",
+    "ministerio",
+    "consejeria",
+    "diputacion",
+    "comunidad autonoma",
+    "universidad",
+    "consorcio",
+    "mancomunidad",
+    "cabildo",
+    "fundacion publica",
+    "entidad publica"
+  ],
+  "private_cif_prefixes": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "J",
+    "N",
+    "W"
+  ],
+  "private_legal_forms": [
+    "s.l.",
+    "s.l",
+    "sl",
+    "s.a.",
+    "s.a",
+    "sa",
+    "s.l.u.",
+    "slu",
+    "cooperativa"
+  ],
+  "hot_threshold": 0.55,
+  "warm_threshold": 0.38,
+  "hot_dispatch_min": 0.55,
+  "relationship_scores": {
+    "cold": 0.30,
+    "warm": 0.60,
+    "hot": 0.90,
+    "existing_client": 1.00
+  }
+}
