@@ -11,7 +11,7 @@ class Settings:
     boe_base_url: str = os.getenv("BOE_BASE_URL", "https://www.boe.es/datosabiertos/api")
     bocm_base_url: str = os.getenv("BOCM_BASE_URL", "https://www.bocm.es")
     vpd: str = os.getenv("SNPSAP_VPD", "GE")
-    request_timeout_seconds: int = int(os.getenv("REQUEST_TIMEOUT_SECONDS", "25"))
+    request_timeout_seconds: int = int(os.getenv("REQUEST_TIMEOUT_SECONDS", "45"))
     max_pages_per_keyword: int = int(os.getenv("MAX_PAGES_PER_KEYWORD", "2"))
     page_size: int = int(os.getenv("PAGE_SIZE", "50"))
 

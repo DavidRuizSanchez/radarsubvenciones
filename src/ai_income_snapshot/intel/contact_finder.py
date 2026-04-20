@@ -80,7 +80,7 @@ class ContactFinder:
                 continue
             visited_urls.add(target_url)
             try:
-                html = self.http.get_text(target_url, headers={"User-Agent": "RadarCapitalPublico/0.1"}, retries=1)
+                html = self.http.get_text(target_url, retries=1)
             except Exception:  # noqa: BLE001
                 continue
 

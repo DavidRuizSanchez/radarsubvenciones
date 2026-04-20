@@ -434,7 +434,11 @@
               {% for lead in leads %}
               <tr>
                 <td>
+                  {% if lead.website %}
+                  <strong><a href="{{ lead.website }}" target="_blank" rel="noopener">{{ lead.company_name }}</a></strong><br />
+                  {% else %}
                   <strong>{{ lead.company_name }}</strong><br />
+                  {% endif %}
                   CIF: {{ lead.cif or 'N/D' }}<br />
                   Región: {{ lead.region or 'N/D' }}
                 </td>

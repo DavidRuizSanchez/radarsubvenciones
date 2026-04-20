@@ -23,6 +23,7 @@ from .intel.lead_explanations import (
     summarize_top_opportunity,
 )
 from .intel.scoring import explain_score, history_score_from_awards, weighted_final_score
+from .intel.website_guesser import guess_websites_bulk
 from .intel.website_signals import WebsiteSignalAnalyzer
 from .models import LeadScore, Opportunity
 from .reporting import ensure_run_directory, write_leads_csv, write_markdown_summary, write_signals_csv
@@ -75,6 +76,7 @@ class RadarCapitalPipeline:
                 max_companies=max_discovered_companies,
                 region_filter=discovery_region_filter,
             )
+            self._enrich_with_guessed_websites(companies)
         else:
             if companies_csv_path is None:
                 raise ValueError(
@@ -202,6 +204,18 @@ class RadarCapitalPipeline:
             companies_filtered_out_count=companies_filtered_out_count,
             companies_source=companies_source,
         )
+
+    def _enrich_with_guessed_websites(self, companies: list) -> None:
+        """Adivina website para empresas auto-descubiertas que lleguen sin web."""
+        pending = [company for company in companies if not company.website]
+        if not pending:
+            return
+
+        guesses = guess_websites_bulk([company.name for company in pending])
+        for company in pending:
+            url = guesses.get(company.name.strip())
+            if url:
+                company.website = url
 
     def _collect_bulletin_signals(self, target_date: date) -> list[Opportunity]:
         signals: list[Opportunity] = []

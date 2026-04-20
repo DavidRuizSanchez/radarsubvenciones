@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import date
+import logging
 import re
 from typing import Any
 
@@ -8,6 +9,9 @@ from ..config import Settings
 from ..models import Company, Opportunity
 from ..utils import normalize_text, to_ddmmyyyy
 from .http import SimpleHttpClient
+
+
+logger = logging.getLogger(__name__)
 
 
 class BDNSClient:
@@ -73,7 +77,17 @@ class BDNSClient:
 
         for keyword in keywords:
             for page in range(self.settings.max_pages_per_keyword):
-                payload = self.search_convocatorias(keyword, start_date, end_date, page=page)
+                try:
+                    payload = self.search_convocatorias(keyword, start_date, end_date, page=page)
+                except Exception as error:  # noqa: BLE001
+                    logger.warning(
+                        "BDNS convocatorias falló (keyword=%s page=%d): %s. Continuamos con el resto.",
+                        keyword,
+                        page,
+                        error,
+                    )
+                    break
+
                 records = payload.get("content", [])
                 for record in records:
                     external_id = str(record.get("numeroConvocatoria", "")).strip()
@@ -109,15 +123,23 @@ class BDNSClient:
         if not clean_cif:
             return 0
 
-        payload = self._get(
-            "concesiones/busqueda",
-            {
-                "vpd": self.settings.vpd,
-                "nifCif": clean_cif,
-                "page": 0,
-                "pageSize": 1,
-            },
-        )
+        try:
+            payload = self._get(
+                "concesiones/busqueda",
+                {
+                    "vpd": self.settings.vpd,
+                    "nifCif": clean_cif,
+                    "page": 0,
+                    "pageSize": 1,
+                },
+            )
+        except Exception as error:  # noqa: BLE001
+            logger.warning(
+                "BDNS histórico concesiones falló para CIF %s: %s. Devolvemos 0.",
+                clean_cif,
+                error,
+            )
+            return 0
         return int(payload.get("totalElements", 0) or 0)
 
     def discover_companies_from_concessions(
@@ -133,20 +155,30 @@ class BDNSClient:
 
         for keyword in keywords:
             for page in range(self.settings.max_pages_per_keyword):
-                payload = self._get(
-                    "concesiones/busqueda",
-                    {
-                        "vpd": self.settings.vpd,
-                        "page": page,
-                        "pageSize": self.settings.page_size,
-                        "descripcion": keyword,
-                        "descripcionTipoBusqueda": 2,
-                        "fechaRegInicio": to_ddmmyyyy(start_date.isoformat()),
-                        "fechaRegFin": to_ddmmyyyy(end_date.isoformat()),
-                        "order": "fechaConcesion",
-                        "direccion": "desc",
-                    },
-                )
+                try:
+                    payload = self._get(
+                        "concesiones/busqueda",
+                        {
+                            "vpd": self.settings.vpd,
+                            "page": page,
+                            "pageSize": self.settings.page_size,
+                            "descripcion": keyword,
+                            "descripcionTipoBusqueda": 2,
+                            "fechaRegInicio": to_ddmmyyyy(start_date.isoformat()),
+                            "fechaRegFin": to_ddmmyyyy(end_date.isoformat()),
+                            "order": "fechaConcesion",
+                            "direccion": "desc",
+                        },
+                    )
+                except Exception as error:  # noqa: BLE001
+                    logger.warning(
+                        "BDNS concesiones falló (keyword=%s page=%d): %s. Continuamos con el resto.",
+                        keyword,
+                        page,
+                        error,
+                    )
+                    break
+
                 records = payload.get("content", [])
                 for record in records:
                     discovered = _company_from_concesion_record(record)
