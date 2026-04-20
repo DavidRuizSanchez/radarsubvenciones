@@ -282,6 +282,48 @@
           grid-template-columns: 1fr;
         }
       }
+
+      .progress-panel {
+        display: none;
+        margin-top: 16px;
+        padding: 16px;
+        background: #f0f6ff;
+        border: 1px solid #b9cffb;
+        border-radius: 12px;
+      }
+
+      .progress-panel.active {
+        display: block;
+      }
+
+      .progress-stage {
+        font-weight: 600;
+        margin-bottom: 8px;
+      }
+
+      .progress-bar-wrap {
+        background: #e1e8f5;
+        border-radius: 999px;
+        height: 12px;
+        overflow: hidden;
+      }
+
+      .progress-bar-fill {
+        background: linear-gradient(90deg, #165dff 0%, #2ba0ff 100%);
+        height: 100%;
+        width: 0;
+        transition: width 0.4s ease;
+      }
+
+      .progress-meta {
+        margin-top: 6px;
+        color: #4f627d;
+        font-size: 12px;
+      }
+
+      .progress-panel.error .progress-bar-fill {
+        background: #b42318;
+      }
     </style>
   </head>
   <body>
@@ -291,7 +333,7 @@
         <p class="subtitle">Motor de generación de leads + proceso comercial integrado (sin salir de la web).</p>
 
         <h2>Nuevo Snapshot</h2>
-        <form method="post">
+        <form id="pipeline-form" method="post">
           <input type="hidden" name="action" value="run_pipeline" />
           <div class="grid">
             <div class="field">
@@ -346,9 +388,15 @@
             </div>
           </div>
           <div class="form-actions">
-            <button type="submit">Ejecutar y crear proceso comercial</button>
+            <button id="pipeline-submit" type="submit">Ejecutar y crear proceso comercial</button>
           </div>
         </form>
+
+        <div id="pipeline-progress" class="progress-panel" role="status" aria-live="polite">
+          <div class="progress-stage" id="pipeline-progress-stage">Preparando ejecución…</div>
+          <div class="progress-bar-wrap"><div class="progress-bar-fill" id="pipeline-progress-fill"></div></div>
+          <div class="progress-meta" id="pipeline-progress-meta"></div>
+        </div>
 
         {% if success_message %}
         <div class="message success">{{ success_message }}</div>
@@ -504,5 +552,85 @@
         {% endif %}
       </section>
     </div>
+
+    <script>
+      (function () {
+        const form = document.getElementById("pipeline-form");
+        const submitBtn = document.getElementById("pipeline-submit");
+        const panel = document.getElementById("pipeline-progress");
+        const stageEl = document.getElementById("pipeline-progress-stage");
+        const fillEl = document.getElementById("pipeline-progress-fill");
+        const metaEl = document.getElementById("pipeline-progress-meta");
+        if (!form) return;
+
+        function showPanel(state) {
+          panel.classList.remove("error");
+          panel.classList.add("active");
+          stageEl.textContent = state.stage || "Ejecutando pipeline…";
+          const percent = Math.max(0, Math.min(100, state.progress_percent || 0));
+          fillEl.style.width = percent + "%";
+          let meta = percent + "%";
+          if (state.progress_total) {
+            meta += " · " + (state.progress_current || 0) + "/" + state.progress_total;
+          }
+          metaEl.textContent = meta;
+        }
+
+        function showError(message) {
+          panel.classList.add("error");
+          stageEl.textContent = "Error: " + message;
+          fillEl.style.width = "100%";
+          metaEl.textContent = "";
+        }
+
+        async function pollJob(jobId) {
+          try {
+            const res = await fetch("/pipeline/progress/" + encodeURIComponent(jobId));
+            if (!res.ok) throw new Error("No se pudo consultar el estado (" + res.status + ").");
+            const state = await res.json();
+            showPanel(state);
+
+            if (state.status === "completed") {
+              stageEl.textContent = "Completado. Cargando resultados…";
+              const target = new URL(window.location.href);
+              target.searchParams.set("run_id", state.result_run_id);
+              window.location.href = target.toString();
+              return;
+            }
+            if (state.status === "failed") {
+              showError(state.error_message || "Fallo desconocido.");
+              submitBtn.disabled = false;
+              return;
+            }
+            setTimeout(() => pollJob(jobId), 1200);
+          } catch (error) {
+            showError(error.message || String(error));
+            submitBtn.disabled = false;
+          }
+        }
+
+        form.addEventListener("submit", async function (event) {
+          event.preventDefault();
+          submitBtn.disabled = true;
+          panel.classList.remove("error");
+          panel.classList.add("active");
+          stageEl.textContent = "Enviando petición…";
+          fillEl.style.width = "4%";
+          metaEl.textContent = "";
+
+          const payload = new FormData(form);
+          try {
+            const res = await fetch("/pipeline/start", { method: "POST", body: payload });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "No se pudo iniciar el pipeline.");
+            if (data.state) showPanel(data.state);
+            pollJob(data.job_id);
+          } catch (error) {
+            showError(error.message || String(error));
+            submitBtn.disabled = false;
+          }
+        });
+      })();
+    </script>
   </body>
 </html>

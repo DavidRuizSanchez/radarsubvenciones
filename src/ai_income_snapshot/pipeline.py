@@ -3,6 +3,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import date, timedelta
 from pathlib import Path
+from typing import Callable
+
+ProgressCallback = Callable[[int, int, str], None]
 
 from .clients.bdns_client import BDNSClient
 from .clients.bocm_client import BOCMClient
@@ -60,15 +63,27 @@ class RadarCapitalPipeline:
         auto_discover_companies: bool = False,
         max_discovered_companies: int = 100,
         discovery_region_filter: str = "",
+        progress_callback: ProgressCallback | None = None,
     ) -> PipelineResult:
+        def report(current: int, total: int, stage: str) -> None:
+            if progress_callback is not None:
+                try:
+                    progress_callback(current, total, stage)
+                except Exception:  # noqa: BLE001
+                    # No dejamos que un callback defectuoso rompa el pipeline.
+                    pass
+
         topics = topics or DEFAULT_TOPICS
         start_date, end_date = lookback_window(self.settings.lookback_days)
+
+        report(0, 0, "Descargando convocatorias BDNS…")
         opportunities = self.bdns.collect_target_opportunities(topics, start_date, end_date)
         dispatch_calibration = load_dispatch_calibration(calibration_file)
 
         companies_source = "csv"
         if auto_discover_companies:
             companies_source = "auto_discovery_bdns"
+            report(0, 0, "Descubriendo empresas desde BDNS/concesiones…")
             companies = self.bdns.discover_companies_from_concessions(
                 keywords=topics,
                 start_date=start_date,
@@ -76,6 +91,7 @@ class RadarCapitalPipeline:
                 max_companies=max_discovered_companies,
                 region_filter=discovery_region_filter,
             )
+            report(0, 0, f"Adivinando website para {len(companies)} empresas…")
             self._enrich_with_guessed_websites(companies)
         else:
             if companies_csv_path is None:
@@ -104,10 +120,15 @@ class RadarCapitalPipeline:
                 "Ajusta reglas en calibración (privadas, región, ticket mínimo)."
             )
 
+        report(0, 0, "Recolectando señales de BOE/BOCM…")
         bulletin_signals = self._collect_bulletin_signals(end_date)
 
+        total_companies = len(companies)
+        report(0, total_companies, f"Analizando {total_companies} empresas…")
+
         scored_leads: list[LeadScore] = []
-        for company in companies:
+        for index, company in enumerate(companies):
+            report(index, total_companies, f"Analizando {company.name[:60]}")
             resolved_website = self.contact_finder.resolve_website(company.website, company.name)
             if resolved_website:
                 company.website = resolved_website
@@ -191,6 +212,7 @@ class RadarCapitalPipeline:
             lead.reasons = explain_score(lead)
             scored_leads.append(lead)
 
+        report(total_companies, total_companies, "Generando entregables…")
         scored_leads.sort(key=lambda item: item.final_score, reverse=True)
 
         run_directory = ensure_run_directory(output_dir)
