@@ -9,14 +9,21 @@
         --bg: #f4f7fb;
         --card: #ffffff;
         --ink: #1b2a41;
+        --ink-soft: #4f627d;
         --primary: #165dff;
+        --primary-ink: #0a3fcc;
         --success: #1f8f4e;
         --error: #b42318;
         --border: #d7deea;
+        --border-soft: #e8edf6;
       }
 
       * {
         box-sizing: border-box;
+      }
+
+      html {
+        font-size: 15px;
       }
 
       body {
@@ -24,42 +31,52 @@
         padding: 0;
         background: linear-gradient(160deg, #eef3fb 0%, #f8fbff 55%, #ecf3ff 100%);
         color: var(--ink);
-        font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+        font-family: "Inter", "Segoe UI", Tahoma, Arial, sans-serif;
+        line-height: 1.5;
       }
 
       .container {
-        max-width: 1440px;
+        max-width: 1200px;
         margin: 0 auto;
-        padding: 24px;
+        padding: 28px 24px 48px;
       }
 
       .hero {
         background: var(--card);
         border: 1px solid var(--border);
         border-radius: 16px;
-        padding: 20px;
-        box-shadow: 0 10px 24px rgba(10, 40, 120, 0.08);
-        margin-bottom: 20px;
+        padding: 24px;
+        box-shadow: 0 10px 24px rgba(10, 40, 120, 0.06);
+        margin-bottom: 24px;
       }
 
       h1 {
         margin: 0 0 8px 0;
-        font-size: 28px;
+        font-size: 26px;
+        letter-spacing: -0.01em;
       }
 
       h2 {
-        margin: 0 0 12px 0;
-        font-size: 20px;
+        margin: 0 0 14px 0;
+        font-size: 19px;
+      }
+
+      h3 {
+        margin: 24px 0 12px;
+        font-size: 15px;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+        color: var(--ink-soft);
       }
 
       .subtitle {
-        margin: 0;
-        color: #4f627d;
+        margin: 0 0 20px;
+        color: var(--ink-soft);
       }
 
       .grid {
         display: grid;
-        grid-template-columns: repeat(3, minmax(240px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
         gap: 14px;
       }
 
@@ -71,6 +88,7 @@
       .field label {
         font-weight: 600;
         margin-bottom: 6px;
+        font-size: 13px;
       }
 
       .field input,
@@ -80,6 +98,7 @@
         border-radius: 10px;
         padding: 10px 12px;
         font-size: 14px;
+        font-family: inherit;
       }
 
       .field textarea {
@@ -99,9 +118,10 @@
       }
 
       .form-actions {
-        margin-top: 14px;
+        margin-top: 16px;
         display: flex;
         gap: 8px;
+        flex-wrap: wrap;
       }
 
       button {
@@ -109,25 +129,50 @@
         background: var(--primary);
         color: #fff;
         border-radius: 10px;
-        padding: 10px 14px;
-        font-weight: 700;
+        padding: 10px 16px;
+        font-weight: 600;
         cursor: pointer;
+        font-family: inherit;
+      }
+
+      button:hover {
+        background: var(--primary-ink);
+      }
+
+      button:disabled {
+        background: #8da4c9;
+        cursor: not-allowed;
       }
 
       .button-secondary {
         background: #334e7d;
       }
 
+      .button-secondary:hover {
+        background: #253d65;
+      }
+
       .button-small {
-        padding: 7px 10px;
+        padding: 7px 12px;
         font-size: 12px;
+      }
+
+      .button-ghost {
+        background: transparent;
+        color: var(--primary);
+        border: 1px solid var(--border);
+      }
+
+      .button-ghost:hover {
+        background: #f2f6fd;
       }
 
       .message {
         border-radius: 10px;
-        padding: 10px 12px;
-        margin-top: 12px;
-        font-weight: 600;
+        padding: 10px 14px;
+        margin-top: 14px;
+        font-weight: 500;
+        font-size: 14px;
       }
 
       .message.success {
@@ -143,9 +188,9 @@
       }
 
       .summary {
-        margin-top: 16px;
+        margin-top: 20px;
         display: grid;
-        grid-template-columns: repeat(8, minmax(120px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
         gap: 10px;
       }
 
@@ -153,134 +198,59 @@
         background: var(--card);
         border: 1px solid var(--border);
         border-radius: 12px;
-        padding: 10px;
+        padding: 12px 14px;
       }
 
       .kpi .value {
         font-size: 20px;
         font-weight: 700;
+        overflow-wrap: anywhere;
+      }
+
+      .kpi .label {
+        color: var(--ink-soft);
+        font-size: 12px;
+        margin-top: 2px;
       }
 
       .downloads {
-        margin-top: 14px;
+        margin-top: 20px;
+        font-size: 14px;
       }
 
       .downloads a {
-        margin-right: 10px;
+        margin-right: 12px;
         color: var(--primary);
         text-decoration: none;
-        font-weight: 600;
+        font-weight: 500;
       }
 
-      .table-wrap {
-        margin-top: 18px;
-        overflow-x: auto;
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        background: #fff;
-      }
-
-      table {
-        border-collapse: collapse;
-        width: 100%;
-      }
-
-      th,
-      td {
-        text-align: left;
-        vertical-align: top;
-        padding: 10px 12px;
-        border-bottom: 1px solid #e8edf6;
-        font-size: 13px;
-      }
-
-      th {
-        background: #f2f6fd;
-        position: sticky;
-        top: 0;
-        z-index: 1;
-      }
-
-      .score {
-        font-weight: 700;
-      }
-
-      .tier {
-        font-weight: 700;
-        border-radius: 999px;
-        padding: 4px 8px;
-        display: inline-block;
-        font-size: 12px;
-      }
-
-      .tier.hot {
-        background: #ffe4e6;
-        color: #9f1239;
-      }
-
-      .tier.warm {
-        background: #fff4e6;
-        color: #b45309;
-      }
-
-      .tier.cold {
-        background: #e8f1ff;
-        color: #1d4ed8;
-      }
-
-      .lead-form {
-        display: grid;
-        gap: 6px;
-      }
-
-      .lead-form select,
-      .lead-form input,
-      .lead-form textarea {
-        width: 100%;
-        font-size: 12px;
-        padding: 6px 8px;
-        border-radius: 8px;
-        border: 1px solid var(--border);
-      }
-
-      .lead-form textarea {
-        min-height: 64px;
+      .downloads a:hover {
+        text-decoration: underline;
       }
 
       .funnel {
-        margin-top: 16px;
+        margin-top: 12px;
         display: grid;
-        grid-template-columns: repeat(8, minmax(100px, 1fr));
-        gap: 8px;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 10px;
       }
 
       .funnel .step {
         background: #f8fbff;
         border: 1px solid var(--border);
         border-radius: 10px;
-        padding: 8px;
+        padding: 10px 12px;
       }
 
       .funnel .step .n {
         font-weight: 700;
-        font-size: 18px;
+        font-size: 20px;
       }
 
-      @media (max-width: 1100px) {
-        .grid {
-          grid-template-columns: 1fr 1fr;
-        }
-
-        .summary,
-        .funnel {
-          grid-template-columns: 1fr 1fr;
-        }
-      }
-
-      @media (max-width: 720px) {
-        .grid {
-          grid-template-columns: 1fr;
-        }
+      .funnel .step .lbl {
+        color: var(--ink-soft);
+        font-size: 12px;
       }
 
       .progress-panel {
@@ -304,7 +274,7 @@
       .progress-bar-wrap {
         background: #e1e8f5;
         border-radius: 999px;
-        height: 12px;
+        height: 10px;
         overflow: hidden;
       }
 
@@ -317,32 +287,302 @@
 
       .progress-meta {
         margin-top: 6px;
-        color: #4f627d;
+        color: var(--ink-soft);
         font-size: 12px;
       }
 
       .progress-panel.error .progress-bar-fill {
-        background: #b42318;
+        background: var(--error);
+      }
+
+      .toast {
+        display: none;
+        position: fixed;
+        top: 18px;
+        right: 18px;
+        background: #1f8f4e;
+        color: #fff;
+        padding: 10px 16px;
+        border-radius: 10px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        font-weight: 600;
+        z-index: 20;
+        animation: toast-in 0.3s ease;
+      }
+
+      .toast.visible {
+        display: block;
+      }
+
+      @keyframes toast-in {
+        from {
+          opacity: 0;
+          transform: translateY(-8px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* --- Lead cards --- */
+      .leads-list {
+        margin-top: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .lead {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        overflow: hidden;
+      }
+
+      .lead-head {
+        display: grid;
+        grid-template-columns: minmax(0, 2.2fr) 90px 90px minmax(0, 2fr) auto;
+        gap: 14px;
+        align-items: center;
+        padding: 14px 18px;
+      }
+
+      .lead-head:hover {
+        background: #f9fbff;
+      }
+
+      .lead-title {
+        min-width: 0;
+      }
+
+      .lead-title .name {
+        font-weight: 700;
+        font-size: 15px;
+        color: var(--ink);
+        overflow-wrap: anywhere;
+      }
+
+      .lead-title a {
+        color: inherit;
+        text-decoration: none;
+        border-bottom: 1px dashed transparent;
+      }
+
+      .lead-title a:hover {
+        border-bottom-color: var(--primary);
+      }
+
+      .lead-title .meta {
+        color: var(--ink-soft);
+        font-size: 12px;
+        margin-top: 2px;
+      }
+
+      .tier {
+        font-weight: 700;
+        border-radius: 999px;
+        padding: 4px 10px;
+        display: inline-block;
+        font-size: 12px;
+        text-align: center;
+      }
+
+      .tier.hot {
+        background: #ffe4e6;
+        color: #9f1239;
+      }
+
+      .tier.warm {
+        background: #fff4e6;
+        color: #b45309;
+      }
+
+      .tier.cold {
+        background: #e8f1ff;
+        color: #1d4ed8;
+      }
+
+      .score {
+        font-weight: 700;
+        font-size: 16px;
+        text-align: center;
+      }
+
+      .lead-email {
+        min-width: 0;
+      }
+
+      .lead-email .value {
+        font-weight: 500;
+        color: var(--ink);
+        overflow-wrap: anywhere;
+      }
+
+      .lead-email .note {
+        color: var(--ink-soft);
+        font-size: 11px;
+        margin-top: 2px;
+      }
+
+      .lead-toggle {
+        background: transparent;
+        color: var(--primary);
+        border: 1px solid var(--border);
+        padding: 6px 12px;
+        font-size: 12px;
+        border-radius: 8px;
+      }
+
+      .lead-body {
+        display: none;
+        border-top: 1px solid var(--border-soft);
+        padding: 18px;
+        background: #fbfcff;
+      }
+
+      .lead.open .lead-body {
+        display: block;
+      }
+
+      .lead.open .lead-toggle::after {
+        content: " ▲";
+      }
+
+      .lead:not(.open) .lead-toggle::after {
+        content: " ▼";
+      }
+
+      .lead-body-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 16px 24px;
+      }
+
+      .lead-section {
+        min-width: 0;
+      }
+
+      .lead-section-title {
+        font-size: 11px;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: var(--ink-soft);
+        margin: 0 0 4px;
+      }
+
+      .lead-section p,
+      .lead-section .text {
+        margin: 0;
+        font-size: 13.5px;
+        line-height: 1.55;
+        color: var(--ink);
+        overflow-wrap: anywhere;
+      }
+
+      .lead-section.callout p {
+        background: #f0f6ff;
+        border: 1px solid #cfdffb;
+        border-radius: 10px;
+        padding: 10px 12px;
+      }
+
+      .lead-section.callout.next p {
+        background: #fff8ea;
+        border-color: #fde3a6;
+      }
+
+      .lead-section .placeholder {
+        color: var(--ink-soft);
+        font-style: italic;
+      }
+
+      .convocatoria-link {
+        color: var(--primary);
+        text-decoration: none;
+        font-weight: 500;
+      }
+
+      .convocatoria-link:hover {
+        text-decoration: underline;
+      }
+
+      .lead-form {
+        margin-top: 16px;
+        padding-top: 16px;
+        border-top: 1px dashed var(--border);
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 10px;
+      }
+
+      .lead-form label {
+        font-size: 11px;
+        color: var(--ink-soft);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        display: block;
+        margin-bottom: 4px;
+      }
+
+      .lead-form select,
+      .lead-form input,
+      .lead-form textarea {
+        width: 100%;
+        font-size: 13px;
+        padding: 7px 10px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        font-family: inherit;
+      }
+
+      .lead-form textarea {
+        min-height: 64px;
+        grid-column: 1 / -1;
+      }
+
+      .lead-form .form-submit {
+        grid-column: 1 / -1;
+        display: flex;
+        justify-content: flex-end;
+      }
+
+      @media (max-width: 880px) {
+        .lead-head {
+          grid-template-columns: 1fr 1fr;
+          row-gap: 10px;
+        }
+
+        .lead-head .score,
+        .lead-head .tier-cell {
+          justify-self: start;
+        }
+
+        .lead-body-grid {
+          grid-template-columns: 1fr;
+        }
       }
     </style>
   </head>
   <body>
+    <div id="success-toast" class="toast" role="status">Snapshot creado</div>
+
     <div class="container">
       <section class="hero">
-        <h1>Radar de Capital Publico</h1>
-        <p class="subtitle">Motor de generación de leads + proceso comercial integrado (sin salir de la web).</p>
+        <h1>Radar de Capital Público</h1>
+        <p class="subtitle">Motor de generación de leads + proceso comercial integrado.</p>
 
-        <h2>Nuevo Snapshot</h2>
+        <h2>Nuevo snapshot</h2>
         <form id="pipeline-form" method="post">
           <input type="hidden" name="action" value="run_pipeline" />
           <div class="grid">
             <div class="field">
               <label for="companies_path">CSV de empresas</label>
               <input id="companies_path" name="companies_path" type="text" value="{{ form_data.companies_path }}" />
-              <small>Se usa solo si desactivas auto-descubrimiento.</small>
+              <small style="color: var(--ink-soft); margin-top: 4px;">Solo si desactivas auto-descubrimiento.</small>
             </div>
             <div class="field">
-              <label for="calibration_file">JSON de calibracion despacho</label>
+              <label for="calibration_file">JSON calibración despacho</label>
               <input id="calibration_file" name="calibration_file" type="text" value="{{ form_data.calibration_file }}" />
             </div>
             <div class="field">
@@ -351,7 +591,7 @@
             </div>
 
             <div class="field">
-              <label>Modo descubrimiento automático</label>
+              <label>Modo descubrimiento</label>
               <div class="checkbox-row">
                 <input
                   id="auto_discover_companies"
@@ -360,31 +600,21 @@
                   value="1"
                   {% if form_data.auto_discover_companies %}checked{% endif %}
                 />
-                <label for="auto_discover_companies">Buscar empresas en BDNS/concesiones</label>
+                <label for="auto_discover_companies" style="margin: 0;">Buscar empresas en BDNS</label>
               </div>
             </div>
             <div class="field">
-              <label for="max_discovered_companies">Máximo empresas descubiertas</label>
-              <input
-                id="max_discovered_companies"
-                name="max_discovered_companies"
-                type="text"
-                value="{{ form_data.max_discovered_companies }}"
-              />
+              <label for="max_discovered_companies">Máx. empresas descubiertas</label>
+              <input id="max_discovered_companies" name="max_discovered_companies" type="text" value="{{ form_data.max_discovered_companies }}" />
             </div>
             <div class="field">
               <label for="discovery_region_filter">Filtro región (opcional)</label>
-              <input
-                id="discovery_region_filter"
-                name="discovery_region_filter"
-                type="text"
-                value="{{ form_data.discovery_region_filter }}"
-              />
+              <input id="discovery_region_filter" name="discovery_region_filter" type="text" value="{{ form_data.discovery_region_filter }}" />
             </div>
 
-            <div class="field">
+            <div class="field" style="grid-column: 1 / -1;">
               <label for="topics">Temas (coma separados)</label>
-              <textarea id="topics" name="topics">{{ form_data.topics }}</textarea>
+              <textarea id="topics" name="topics" placeholder="digitalizacion, innovacion, eficiencia energetica…">{{ form_data.topics }}</textarea>
             </div>
           </div>
           <div class="form-actions">
@@ -408,10 +638,10 @@
       </section>
 
       <section class="hero">
-        <h2>Proceso Comercial</h2>
+        <h2>Proceso comercial</h2>
 
-        <form method="get" class="form-actions">
-          <div class="field" style="max-width: 420px;">
+        <form method="get" style="display: flex; gap: 10px; align-items: end; flex-wrap: wrap;">
+          <div class="field" style="flex: 1; min-width: 280px;">
             <label for="run_id">Run a gestionar</label>
             <select id="run_id" name="run_id" onchange="this.form.submit()">
               {% if not runs %}
@@ -419,7 +649,7 @@
               {% endif %}
               {% for run in runs %}
               <option value="{{ run.run_id }}" {% if selected_run_id == run.run_id %}selected{% endif %}>
-                {{ run.run_id }} | {{ run.created_at }} | {{ run.companies_source }}
+                {{ run.run_id }} · {{ run.created_at }} · {{ run.companies_source }}
               </option>
               {% endfor %}
             </select>
@@ -429,28 +659,27 @@
 
         {% if summary %}
         <div class="summary">
-          <div class="kpi"><div class="value">{{ summary.leads_count }}</div><div>Leads finales</div></div>
-          <div class="kpi"><div class="value">{{ summary.companies_input_count }}</div><div>Empresas entrada</div></div>
-          <div class="kpi"><div class="value">{{ summary.companies_filtered_out_count }}</div><div>Filtradas</div></div>
-          <div class="kpi"><div class="value">{{ summary.companies_source }}</div><div>Origen</div></div>
-          <div class="kpi"><div class="value">{{ summary.opportunities_count }}</div><div>Convocatorias</div></div>
-          <div class="kpi"><div class="value">{{ summary.bulletin_signals_count }}</div><div>Señales boletín</div></div>
-          <div class="kpi"><div class="value">{{ summary.run_id }}</div><div>Run ID</div></div>
-          <div class="kpi"><div class="value">{{ summary.created_at }}</div><div>Creado</div></div>
+          <div class="kpi"><div class="value">{{ summary.leads_count }}</div><div class="label">Leads finales</div></div>
+          <div class="kpi"><div class="value">{{ summary.companies_input_count }}</div><div class="label">Empresas entrada</div></div>
+          <div class="kpi"><div class="value">{{ summary.companies_filtered_out_count }}</div><div class="label">Filtradas</div></div>
+          <div class="kpi"><div class="value">{{ summary.companies_source }}</div><div class="label">Origen</div></div>
+          <div class="kpi"><div class="value">{{ summary.opportunities_count }}</div><div class="label">Convocatorias</div></div>
+          <div class="kpi"><div class="value">{{ summary.bulletin_signals_count }}</div><div class="label">Señales boletín</div></div>
+          <div class="kpi"><div class="value" style="font-size: 13px;">{{ summary.run_id }}</div><div class="label">Run ID</div></div>
+          <div class="kpi"><div class="value" style="font-size: 13px;">{{ summary.created_at }}</div><div class="label">Creado</div></div>
         </div>
 
         {% if funnel %}
-        <h3 style="margin: 0 0 12px;">Embudo comercial</h3>
-        <p style="margin: 0 0 16px; color: #5c7080;">Total leads en seguimiento: {{ funnel.total }}</p>
+        <h3>Embudo comercial · {{ funnel.total }} leads en seguimiento</h3>
         <div class="funnel">
-          <div class="step"><div class="n">{{ funnel.status.NUEVO }}</div><div>NUEVO</div></div>
-          <div class="step"><div class="n">{{ funnel.status.CONTACTADO }}</div><div>CONTACTADO</div></div>
-          <div class="step"><div class="n">{{ funnel.status.RESPONDIDO }}</div><div>RESPONDIDO</div></div>
-          <div class="step"><div class="n">{{ funnel.status.REUNION }}</div><div>REUNION</div></div>
-          <div class="step"><div class="n">{{ funnel.status.OFERTA }}</div><div>OFERTA</div></div>
-          <div class="step"><div class="n">{{ funnel.status.CERRADO_GANADO }}</div><div>GANADO</div></div>
-          <div class="step"><div class="n">{{ funnel.status.CERRADO_PERDIDO }}</div><div>PERDIDO</div></div>
-          <div class="step"><div class="n">{{ funnel.status.DESCARTADO }}</div><div>DESCARTADO</div></div>
+          <div class="step"><div class="n">{{ funnel.status.NUEVO }}</div><div class="lbl">NUEVO</div></div>
+          <div class="step"><div class="n">{{ funnel.status.CONTACTADO }}</div><div class="lbl">CONTACTADO</div></div>
+          <div class="step"><div class="n">{{ funnel.status.RESPONDIDO }}</div><div class="lbl">RESPONDIDO</div></div>
+          <div class="step"><div class="n">{{ funnel.status.REUNION }}</div><div class="lbl">REUNIÓN</div></div>
+          <div class="step"><div class="n">{{ funnel.status.OFERTA }}</div><div class="lbl">OFERTA</div></div>
+          <div class="step"><div class="n">{{ funnel.status.CERRADO_GANADO }}</div><div class="lbl">GANADO</div></div>
+          <div class="step"><div class="n">{{ funnel.status.CERRADO_PERDIDO }}</div><div class="lbl">PERDIDO</div></div>
+          <div class="step"><div class="n">{{ funnel.status.DESCARTADO }}</div><div class="lbl">DESCARTADO</div></div>
         </div>
         {% endif %}
 
@@ -461,99 +690,135 @@
           {% endfor %}
         </div>
 
-        <h3 style="margin: 8px 0 12px;">Leads y Gestión Diaria</h3>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Empresa</th>
-                <th>Semáforo</th>
-                <th>Score</th>
-                <th>Email sugerido</th>
-                <th>Convocatoria</th>
-                <th>Resumen</th>
-                <th>Por qué califica</th>
-                <th>Siguiente acción</th>
-                <th>Pitch comercial</th>
-                <th>Gestión</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for lead in leads %}
-              <tr>
-                <td>
+        <h3>Leads y gestión diaria</h3>
+        <div style="display: flex; gap: 10px; margin-bottom: 8px; flex-wrap: wrap;">
+          <button type="button" class="button-ghost button-small" id="expand-all">Desplegar todos</button>
+          <button type="button" class="button-ghost button-small" id="collapse-all">Colapsar todos</button>
+        </div>
+
+        <div class="leads-list">
+          {% for lead in leads %}
+          <article class="lead" data-lead-id="{{ lead.id }}">
+            <div class="lead-head" onclick="toggleLead(this.parentElement, event)">
+              <div class="lead-title">
+                <div class="name">
                   {% if lead.company_website %}
-                  <a href="{{ lead.company_website }}" target="_blank" rel="noopener">
-                    <strong>{{ lead.company_name }}</strong>
-                  </a><br />
+                  <a href="{{ lead.company_website }}" target="_blank" rel="noopener" onclick="event.stopPropagation()">{{ lead.company_name }}</a>
                   {% else %}
-                  <strong>{{ lead.company_name }}</strong><br />
+                  {{ lead.company_name }}
                   {% endif %}
-                  CIF: {{ lead.cif or 'N/D' }}<br />
-                  Región: {{ lead.region or 'N/D' }}
-                </td>
-                <td><span class="tier {{ lead.lead_tier|lower }}">{{ lead.lead_tier }}</span></td>
-                <td class="score">{{ '%.4f'|format(lead.final_score) }}</td>
-                <td>
-                  {{ lead.suggested_contact_email or 'N/D' }}<br />
-                  <small>conf. {{ '%.2f'|format(lead.contact_email_confidence or 0) }} | {{ lead.contact_email_source }}</small>
-                </td>
-                <td>
+                </div>
+                <div class="meta">
+                  {% if lead.cif %}CIF {{ lead.cif }} · {% endif %}{{ lead.region or 'Región N/D' }}
+                </div>
+              </div>
+              <div class="tier-cell"><span class="tier {{ lead.lead_tier|lower }}">{{ lead.lead_tier }}</span></div>
+              <div class="score">{{ '%.2f'|format(lead.final_score) }}</div>
+              <div class="lead-email">
+                <div class="value">{{ lead.suggested_contact_email or 'Sin email sugerido' }}</div>
+                {% if lead.suggested_contact_email %}
+                <div class="note">conf. {{ '%.2f'|format(lead.contact_email_confidence or 0) }} · {{ lead.contact_email_source }}</div>
+                {% endif %}
+              </div>
+              <button type="button" class="lead-toggle" onclick="event.stopPropagation(); toggleLead(this.closest('.lead'))">Detalle</button>
+            </div>
+
+            <div class="lead-body">
+              <div class="lead-body-grid">
+                <div class="lead-section" style="grid-column: 1 / -1;">
+                  <div class="lead-section-title">A qué se dedica</div>
+                  {% if lead.company_summary %}
+                  <p class="text">{{ lead.company_summary }}</p>
+                  {% else %}
+                  <p class="placeholder">Sin descripción disponible {% if lead.company_website %}(la web no expuso meta description ni título){% else %}(sin web adivinada){% endif %}.</p>
+                  {% endif %}
+                </div>
+
+                <div class="lead-section">
+                  <div class="lead-section-title">Convocatoria priorizada</div>
                   {% if lead.opportunity_id %}
-                    {% if lead.opportunity_url %}
-                    <a href="{{ lead.opportunity_url }}" target="_blank" rel="noopener">{{ lead.opportunity_id }}</a><br />
-                    {% else %}
-                    {{ lead.opportunity_id }}<br />
-                    {% endif %}
-                    <small>{{ lead.opportunity_title }}</small>
+                  {% if lead.opportunity_url %}
+                  <p><a class="convocatoria-link" href="{{ lead.opportunity_url }}" target="_blank" rel="noopener">{{ lead.opportunity_id }}</a> · {{ lead.opportunity_title }}</p>
                   {% else %}
-                    N/D
+                  <p><strong>{{ lead.opportunity_id }}</strong> · {{ lead.opportunity_title }}</p>
                   {% endif %}
-                </td>
-                <td>{{ lead.opportunity_summary }}</td>
-                <td>{{ lead.qualification_reason }}</td>
-                <td>{{ lead.next_action }}</td>
-                <td>{{ lead.commercial_pitch }}</td>
-                <td>
-                  <form method="post" class="lead-form">
-                    <input type="hidden" name="action" value="update_lead" />
-                    <input type="hidden" name="selected_run_id" value="{{ selected_run_id }}" />
-                    <input type="hidden" name="lead_id" value="{{ lead.id }}" />
+                  {% else %}
+                  <p class="placeholder">Sin convocatoria destacada.</p>
+                  {% endif %}
+                </div>
 
-                    <label>Estado</label>
-                    <select name="status">
-                      {% for status in status_options %}
-                      <option value="{{ status }}" {% if lead.status == status %}selected{% endif %}>{{ status }}</option>
-                      {% endfor %}
-                    </select>
+                <div class="lead-section">
+                  <div class="lead-section-title">Resumen convocatoria</div>
+                  <p class="text">{{ lead.opportunity_summary or 'N/D' }}</p>
+                </div>
 
-                    <label>Canal</label>
-                    <select name="channel">
-                      <option value="" {% if not lead.last_contact_channel %}selected{% endif %}>-</option>
-                      {% for channel in channel_options %}
-                      <option value="{{ channel }}" {% if lead.last_contact_channel == channel %}selected{% endif %}>{{ channel }}</option>
-                      {% endfor %}
-                    </select>
+                <div class="lead-section">
+                  <div class="lead-section-title">Por qué califica</div>
+                  <p class="text">{{ lead.qualification_reason or 'N/D' }}</p>
+                </div>
 
-                    <label>Próximo seguimiento</label>
-                    <input name="next_follow_up_date" type="date" value="{{ lead.next_follow_up_date or '' }}" />
+                <div class="lead-section callout next">
+                  <div class="lead-section-title">Siguiente acción</div>
+                  <p>{{ lead.next_action or 'N/D' }}</p>
+                </div>
 
-                    <label>Notas</label>
-                    <textarea name="notes">{{ lead.notes or '' }}</textarea>
+                <div class="lead-section callout" style="grid-column: 1 / -1;">
+                  <div class="lead-section-title">Pitch comercial sugerido</div>
+                  <p>{{ lead.commercial_pitch or 'N/D' }}</p>
+                </div>
+              </div>
 
-                    <button class="button-small" type="submit">Guardar</button>
-                  </form>
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
+              <form method="post" class="lead-form">
+                <input type="hidden" name="action" value="update_lead" />
+                <input type="hidden" name="selected_run_id" value="{{ selected_run_id }}" />
+                <input type="hidden" name="lead_id" value="{{ lead.id }}" />
+
+                <div>
+                  <label>Estado</label>
+                  <select name="status">
+                    {% for status in status_options %}
+                    <option value="{{ status }}" {% if lead.status == status %}selected{% endif %}>{{ status }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div>
+                  <label>Canal</label>
+                  <select name="channel">
+                    <option value="" {% if not lead.last_contact_channel %}selected{% endif %}>—</option>
+                    {% for channel in channel_options %}
+                    <option value="{{ channel }}" {% if lead.last_contact_channel == channel %}selected{% endif %}>{{ channel }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div>
+                  <label>Próximo seguimiento</label>
+                  <input name="next_follow_up_date" type="date" value="{{ lead.next_follow_up_date or '' }}" />
+                </div>
+                <div style="grid-column: 1 / -1;">
+                  <label>Notas</label>
+                  <textarea name="notes">{{ lead.notes or '' }}</textarea>
+                </div>
+                <div class="form-submit">
+                  <button class="button-small" type="submit">Guardar cambios</button>
+                </div>
+              </form>
+            </div>
+          </article>
+          {% endfor %}
         </div>
         {% endif %}
       </section>
     </div>
 
     <script>
+      function toggleLead(leadEl, event) {
+        if (event) {
+          const tag = (event.target.tagName || "").toLowerCase();
+          if (tag === "a" || tag === "button" || tag === "input" || tag === "select" || tag === "textarea") return;
+        }
+        leadEl.classList.toggle("open");
+      }
+
       (function () {
         const form = document.getElementById("pipeline-form");
         const submitBtn = document.getElementById("pipeline-submit");
@@ -561,6 +826,36 @@
         const stageEl = document.getElementById("pipeline-progress-stage");
         const fillEl = document.getElementById("pipeline-progress-fill");
         const metaEl = document.getElementById("pipeline-progress-meta");
+        const toast = document.getElementById("success-toast");
+
+        function showToast(text, kind) {
+          if (!toast) return;
+          toast.textContent = text;
+          toast.style.background = kind === "error" ? "#b42318" : "#1f8f4e";
+          toast.classList.add("visible");
+          setTimeout(() => toast.classList.remove("visible"), 5000);
+        }
+
+        // Banner post-redirect
+        const params = new URLSearchParams(window.location.search);
+        if (params.get("success") === "1") {
+          showToast("Pipeline completado correctamente");
+          params.delete("success");
+          const newSearch = params.toString();
+          const clean = window.location.pathname + (newSearch ? "?" + newSearch : "");
+          window.history.replaceState({}, "", clean);
+        }
+
+        // Expandir/colapsar global
+        const expandAll = document.getElementById("expand-all");
+        const collapseAll = document.getElementById("collapse-all");
+        if (expandAll) expandAll.addEventListener("click", () => {
+          document.querySelectorAll(".lead").forEach(el => el.classList.add("open"));
+        });
+        if (collapseAll) collapseAll.addEventListener("click", () => {
+          document.querySelectorAll(".lead").forEach(el => el.classList.remove("open"));
+        });
+
         if (!form) return;
 
         function showPanel(state) {
@@ -581,6 +876,7 @@
           stageEl.textContent = "Error: " + message;
           fillEl.style.width = "100%";
           metaEl.textContent = "";
+          showToast(message, "error");
         }
 
         async function pollJob(jobId) {
@@ -594,6 +890,7 @@
               stageEl.textContent = "Completado. Cargando resultados…";
               const target = new URL(window.location.href);
               target.searchParams.set("run_id", state.result_run_id);
+              target.searchParams.set("success", "1");
               window.location.href = target.toString();
               return;
             }

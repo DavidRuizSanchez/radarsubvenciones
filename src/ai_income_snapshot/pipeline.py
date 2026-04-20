@@ -208,6 +208,7 @@ class RadarCapitalPipeline:
                 matched_opportunities=matched_opps,
                 historical_awards_count=awards_count,
                 website_signal_excerpt=web_signal.sample_excerpt,
+                company_summary=web_signal.company_summary,
             )
             lead.reasons = explain_score(lead)
             scored_leads.append(lead)

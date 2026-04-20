@@ -39,6 +39,7 @@ class SignalAnalysis:
     matched_terms: list[str]
     word_count: int
     sample_excerpt: str
+    company_summary: str = ""
 
 
 @dataclass(slots=True)
@@ -62,3 +63,4 @@ class LeadScore:
     matched_opportunities: list[Opportunity]
     historical_awards_count: int
     website_signal_excerpt: str
+    company_summary: str = ""
