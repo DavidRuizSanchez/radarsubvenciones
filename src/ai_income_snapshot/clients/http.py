@@ -32,13 +32,19 @@ class SimpleHttpClient:
         headers: dict[str, str] | None = None,
         retries: int = 2,
     ) -> dict[str, Any]:
+        # Fuerza Accept: application/json; el default de sesión prioriza text/html
+        # y algunos backends (BDNS) devuelven HTML cuando ven esa preferencia.
+        request_headers = {"Accept": "application/json"}
+        if headers:
+            request_headers.update(headers)
+
         last_error: Exception | None = None
         for attempt in range(retries + 1):
             try:
                 response = self.session.get(
                     url,
                     params=params,
-                    headers=headers,
+                    headers=request_headers,
                     timeout=self.timeout_seconds,
                 )
                 response.raise_for_status()
