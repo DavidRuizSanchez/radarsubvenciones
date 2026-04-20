@@ -53,16 +53,22 @@ class ContactFinder:
     def __init__(self, timeout_seconds: int = 20):
         self.http = SimpleHttpClient(timeout_seconds=timeout_seconds)
 
-    def suggest_contact(self, website_url: str | None, company_name: str = "") -> ContactSuggestion:
+    def resolve_website(self, website_url: str | None, company_name: str = "") -> str:
+        """Devuelve la URL normalizada si es válida; cadena vacía si no lo es."""
         if not website_url:
+            return ""
+        normalized_url = ensure_url(website_url)
+        return normalized_url if extract_domain(normalized_url) else ""
+
+    def suggest_contact(self, website_url: str | None, company_name: str = "") -> ContactSuggestion:
+        normalized_base_url = self.resolve_website(website_url, company_name)
+        if not normalized_base_url:
             return ContactSuggestion(
                 email="",
                 confidence=0.0,
                 source="sin_web",
                 alternatives=[],
             )
-
-        normalized_base_url = ensure_url(website_url)
         domain = extract_domain(normalized_base_url)
         if not domain:
             return ContactSuggestion(

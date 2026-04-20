@@ -22,6 +22,7 @@ def write_leads_csv(path: Path, leads: list[LeadScore]) -> None:
             [
                 "company_id",
                 "company_name",
+                "company_website",
                 "cif",
                 "region",
                 "fit_score",
@@ -51,6 +52,7 @@ def write_leads_csv(path: Path, leads: list[LeadScore]) -> None:
                 [
                     lead.company.company_id,
                     lead.company.name,
+                    lead.company.website or "",
                     lead.company.cif or "",
                     lead.company.region,
                     f"{lead.fit_score:.4f}",

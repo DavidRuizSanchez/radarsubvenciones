@@ -434,8 +434,10 @@
               {% for lead in leads %}
               <tr>
                 <td>
-                  {% if lead.website %}
-                  <strong><a href="{{ lead.website }}" target="_blank" rel="noopener">{{ lead.company_name }}</a></strong><br />
+                  {% if lead.company_website %}
+                  <a href="{{ lead.company_website }}" target="_blank" rel="noopener">
+                    <strong>{{ lead.company_name }}</strong>
+                  </a><br />
                   {% else %}
                   <strong>{{ lead.company_name }}</strong><br />
                   {% endif %}
