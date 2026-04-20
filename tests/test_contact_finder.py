@@ -1,4 +1,5 @@
 from ai_income_snapshot.intel.contact_finder import (
+    ContactFinder,
     extract_emails_from_text,
     infer_domain_email,
     sanitize_email,
@@ -31,3 +32,24 @@ def test_score_email_candidate_prefers_generic_local_and_matching_domain():
 def test_infer_domain_email_uses_default_contact():
     email = infer_domain_email("empresa.com", "Empresa Legal")
     assert email == "subvenciones@empresa.com"
+
+
+def test_resolve_website_returns_empty_when_missing():
+    finder = ContactFinder()
+    assert finder.resolve_website(None, "Empresa Demo") == ""
+    assert finder.resolve_website("", "Empresa Demo") == ""
+
+
+def test_resolve_website_normalizes_url():
+    finder = ContactFinder()
+    assert finder.resolve_website("empresa-demo.com", "Demo") == "https://empresa-demo.com"
+
+
+def test_suggest_contact_without_website_returns_sin_web_and_no_email():
+    # Protege contra regresión del bug "estimado_nombre_empresa":
+    # sin web válida NUNCA inventar emails desde la razón social.
+    finder = ContactFinder()
+    suggestion = finder.suggest_contact(None, "REPROGRAFIAS MALPE SA")
+    assert suggestion.email == ""
+    assert suggestion.source == "sin_web"
+    assert suggestion.confidence == 0.0

@@ -108,6 +108,10 @@ class RadarCapitalPipeline:
 
         scored_leads: list[LeadScore] = []
         for company in companies:
+            resolved_website = self.contact_finder.resolve_website(company.website, company.name)
+            if resolved_website:
+                company.website = resolved_website
+
             matches = top_matches(company, opportunities, top_n=5)
             matched_opps = [opportunity for opportunity, _ in matches]
             fit_score = matches[0][1] if matches else 0.0

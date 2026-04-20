@@ -50,9 +50,9 @@ def init_sales_db(db_path: str | Path) -> None:
                 run_id TEXT NOT NULL,
                 company_id TEXT,
                 company_name TEXT NOT NULL,
+                company_website TEXT DEFAULT '',
                 cif TEXT,
                 region TEXT,
-                website TEXT DEFAULT '',
                 final_score REAL NOT NULL,
                 lead_tier TEXT NOT NULL,
                 status TEXT NOT NULL DEFAULT 'NUEVO',
@@ -75,10 +75,7 @@ def init_sales_db(db_path: str | Path) -> None:
             """
         )
 
-        # Migración ligera para bases ya existentes sin la columna website.
-        existing_columns = {row["name"] for row in conn.execute("PRAGMA table_info(commercial_leads)").fetchall()}
-        if "website" not in existing_columns:
-            conn.execute("ALTER TABLE commercial_leads ADD COLUMN website TEXT DEFAULT ''")
+        _ensure_column(conn, "commercial_leads", "company_website", "TEXT DEFAULT ''")
 
 
 def save_run_and_leads(
@@ -125,9 +122,9 @@ def save_run_and_leads(
                     run_id,
                     company_id,
                     company_name,
+                    company_website,
                     cif,
                     region,
-                    website,
                     final_score,
                     lead_tier,
                     status,
@@ -145,7 +142,7 @@ def save_run_and_leads(
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT(run_id, company_id, opportunity_id)
                 DO UPDATE SET
-                    website=excluded.website,
+                    company_website=excluded.company_website,
                     final_score=excluded.final_score,
                     lead_tier=excluded.lead_tier,
                     suggested_contact_email=excluded.suggested_contact_email,
@@ -163,9 +160,9 @@ def save_run_and_leads(
                     run_metadata["run_id"],
                     lead.company.company_id,
                     lead.company.name,
+                    lead.company.website or "",
                     lead.company.cif or "",
                     lead.company.region,
-                    lead.company.website or "",
                     lead.final_score,
                     lead.lead_tier,
                     "NUEVO",
@@ -242,9 +239,9 @@ def get_leads_for_run(db_path: str | Path, run_id: str) -> list[dict[str, Any]]:
                 run_id,
                 company_id,
                 company_name,
+                company_website,
                 cif,
                 region,
-                website,
                 final_score,
                 lead_tier,
                 status,
@@ -358,6 +355,14 @@ def _connect(db_path: str | Path) -> sqlite3.Connection:
     conn = sqlite3.connect(str(db_path))
     conn.row_factory = sqlite3.Row
     return conn
+
+
+def _ensure_column(conn: sqlite3.Connection, table: str, column: str, column_definition: str) -> None:
+    rows = conn.execute(f"PRAGMA table_info({table})").fetchall()
+    existing_columns = {row["name"] for row in rows}
+    if column in existing_columns:
+        return
+    conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} {column_definition}")
 
 
 def _now_iso() -> str:
