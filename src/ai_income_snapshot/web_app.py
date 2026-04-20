@@ -2,10 +2,12 @@ from __future__ import annotations
 
 import argparse
 import re
+import threading
 from pathlib import Path
 
-from flask import Flask, abort, render_template, request, send_file
+from flask import Flask, abort, jsonify, render_template, request, send_file
 
+from .jobs import JobTracker
 from .pipeline import RadarCapitalPipeline
 from .sales_process import (
     CHANNEL_OPTIONS,
@@ -27,6 +29,7 @@ def create_app() -> Flask:
     app = Flask(__name__, template_folder="templates")
     app.config["RUN_DIRECTORIES"] = {}
     app.config["SALES_DB_PATH"] = SALES_DB_PATH
+    app.config["JOB_TRACKER"] = JobTracker()
     init_sales_db(SALES_DB_PATH)
 
     @app.route("/", methods=["GET", "POST"])
@@ -85,68 +88,12 @@ def create_app() -> Flask:
                     context["error_message"] = f"Error actualizando lead: {error}"
 
             else:
-                form_data["companies_path"] = (request.form.get("companies_path") or "").strip() or form_data["companies_path"]
-                form_data["output_dir"] = (request.form.get("output_dir") or "").strip() or form_data["output_dir"]
-                form_data["calibration_file"] = (
-                    (request.form.get("calibration_file") or "").strip() or form_data["calibration_file"]
-                )
-                form_data["topics"] = (request.form.get("topics") or "").strip()
-                form_data["auto_discover_companies"] = "1" if request.form.get("auto_discover_companies") else ""
-                form_data["max_discovered_companies"] = (
-                    (request.form.get("max_discovered_companies") or "").strip() or form_data["max_discovered_companies"]
-                )
-                form_data["discovery_region_filter"] = (request.form.get("discovery_region_filter") or "").strip()
+                form_data.update(read_pipeline_form(request.form, form_data))
                 context["form_data"] = form_data
-
-                try:
-                    companies_path = Path(form_data["companies_path"])
-                    output_dir = Path(form_data["output_dir"])
-                    calibration_file = Path(form_data["calibration_file"])
-                    topics = parse_topics(form_data["topics"])
-                    auto_discover = bool(form_data["auto_discover_companies"])
-                    max_discovered_companies = parse_positive_int(form_data["max_discovered_companies"], default=100)
-                    discovery_region_filter = form_data["discovery_region_filter"]
-
-                    if not auto_discover and companies_path.name == "clientes_produccion_template.csv":
-                        raise ValueError(
-                            "Estás en modo CSV manual con la plantilla demo. "
-                            "Activa descubrimiento automático o usa un CSV real."
-                        )
-
-                    pipeline = RadarCapitalPipeline()
-                    result = pipeline.run(
-                        companies_csv_path=None if auto_discover else companies_path,
-                        output_dir=output_dir,
-                        topics=topics or None,
-                        calibration_file=calibration_file,
-                        auto_discover_companies=auto_discover,
-                        max_discovered_companies=max_discovered_companies,
-                        discovery_region_filter=discovery_region_filter,
-                    )
-
-                    run_id = result.run_directory.name
-                    selected_run_id = run_id
-                    app.config["RUN_DIRECTORIES"][run_id] = result.run_directory
-
-                    save_run_and_leads(
-                        db_path=sales_db,
-                        run_metadata={
-                            "run_id": run_id,
-                            "run_directory": str(result.run_directory),
-                            "companies_source": result.companies_source,
-                            "companies_input_count": result.companies_input_count,
-                            "companies_count": result.companies_count,
-                            "companies_filtered_out_count": result.companies_filtered_out_count,
-                            "opportunities_count": result.opportunities_count,
-                            "bulletin_signals_count": result.bulletin_signals_count,
-                            "topics": ",".join(topics),
-                        },
-                        leads=result.leads,
-                    )
-
-                    context["success_message"] = "Pipeline ejecutado y proceso comercial creado correctamente."
-                except Exception as error:  # noqa: BLE001
-                    context["error_message"] = f"Error ejecutando el pipeline: {error}"
+                context["error_message"] = (
+                    "La ejecución del pipeline ahora es asíncrona. "
+                    "Pulsa el botón con JavaScript activado para ver la barra de progreso."
+                )
 
         context["form_data"] = form_data
 
@@ -186,6 +133,85 @@ def create_app() -> Flask:
 
         return render_template("index.html", **context)
 
+    @app.route("/pipeline/start", methods=["POST"])
+    def start_pipeline():
+        tracker: JobTracker = app.config["JOB_TRACKER"]
+        payload = request.get_json(silent=True) or request.form
+
+        try:
+            form_snapshot = read_pipeline_form(payload, _default_pipeline_form())
+            companies_path = Path(form_snapshot["companies_path"])
+            output_dir = Path(form_snapshot["output_dir"])
+            calibration_file = Path(form_snapshot["calibration_file"])
+            topics = parse_topics(form_snapshot["topics"])
+            auto_discover = bool(form_snapshot["auto_discover_companies"])
+            max_discovered_companies = parse_positive_int(form_snapshot["max_discovered_companies"], default=100)
+            discovery_region_filter = form_snapshot["discovery_region_filter"]
+
+            if not auto_discover and companies_path.name == "clientes_produccion_template.csv":
+                raise ValueError(
+                    "Estás en modo CSV manual con la plantilla demo. "
+                    "Activa descubrimiento automático o usa un CSV real."
+                )
+        except Exception as error:  # noqa: BLE001
+            return jsonify({"error": str(error)}), 400
+
+        job = tracker.create()
+
+        sales_db = app.config["SALES_DB_PATH"]
+        run_directories = app.config["RUN_DIRECTORIES"]
+
+        def worker() -> None:
+            def progress(current: int, total: int, stage: str) -> None:
+                tracker.set_progress(job.job_id, current=current, total=total, stage=stage)
+
+            try:
+                pipeline = RadarCapitalPipeline()
+                result = pipeline.run(
+                    companies_csv_path=None if auto_discover else companies_path,
+                    output_dir=output_dir,
+                    topics=topics or None,
+                    calibration_file=calibration_file,
+                    auto_discover_companies=auto_discover,
+                    max_discovered_companies=max_discovered_companies,
+                    discovery_region_filter=discovery_region_filter,
+                    progress_callback=progress,
+                )
+                run_id = result.run_directory.name
+                run_directories[run_id] = result.run_directory
+
+                save_run_and_leads(
+                    db_path=sales_db,
+                    run_metadata={
+                        "run_id": run_id,
+                        "run_directory": str(result.run_directory),
+                        "companies_source": result.companies_source,
+                        "companies_input_count": result.companies_input_count,
+                        "companies_count": result.companies_count,
+                        "companies_filtered_out_count": result.companies_filtered_out_count,
+                        "opportunities_count": result.opportunities_count,
+                        "bulletin_signals_count": result.bulletin_signals_count,
+                        "topics": ",".join(topics),
+                    },
+                    leads=result.leads,
+                )
+                tracker.mark_completed(job.job_id, run_id)
+            except Exception as error:  # noqa: BLE001
+                tracker.mark_failed(job.job_id, str(error))
+
+        thread = threading.Thread(target=worker, name=f"pipeline-{job.job_id[:8]}", daemon=True)
+        thread.start()
+
+        return jsonify({"job_id": job.job_id, "state": tracker.get(job.job_id).as_dict()})
+
+    @app.route("/pipeline/progress/<job_id>", methods=["GET"])
+    def pipeline_progress(job_id: str):
+        tracker: JobTracker = app.config["JOB_TRACKER"]
+        job = tracker.get(job_id)
+        if job is None:
+            abort(404)
+        return jsonify(job.as_dict())
+
     @app.route("/download/<run_id>/<filename>", methods=["GET"])
     def download_output(run_id: str, filename: str):
         if filename not in ALLOWED_OUTPUT_FILES or not is_safe_run_id(run_id):
@@ -208,6 +234,36 @@ def create_app() -> Flask:
         return send_file(file_path, as_attachment=True, download_name=f"{run_id}_{filename}")
 
     return app
+
+
+def _default_pipeline_form() -> dict:
+    return {
+        "companies_path": "data/clientes_produccion_template.csv",
+        "output_dir": "outputs",
+        "calibration_file": "config/calibracion_despacho.json",
+        "topics": "",
+        "auto_discover_companies": "1",
+        "max_discovered_companies": "100",
+        "discovery_region_filter": "",
+    }
+
+
+def read_pipeline_form(source, defaults: dict) -> dict:
+    def pick(key: str) -> str:
+        raw = source.get(key, "") if hasattr(source, "get") else ""
+        if raw is None:
+            raw = ""
+        return str(raw).strip() or defaults.get(key, "")
+
+    return {
+        "companies_path": pick("companies_path"),
+        "output_dir": pick("output_dir"),
+        "calibration_file": pick("calibration_file"),
+        "topics": pick("topics"),
+        "auto_discover_companies": "1" if source.get("auto_discover_companies") else "",
+        "max_discovered_companies": pick("max_discovered_companies"),
+        "discovery_region_filter": pick("discovery_region_filter"),
+    }
 
 
 def parse_topics(raw_topics: str) -> list[str]:
