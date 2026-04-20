@@ -51,6 +51,7 @@ def init_sales_db(db_path: str | Path) -> None:
                 company_id TEXT,
                 company_name TEXT NOT NULL,
                 company_website TEXT DEFAULT '',
+                company_summary TEXT DEFAULT '',
                 cif TEXT,
                 region TEXT,
                 final_score REAL NOT NULL,
@@ -76,6 +77,7 @@ def init_sales_db(db_path: str | Path) -> None:
         )
 
         _ensure_column(conn, "commercial_leads", "company_website", "TEXT DEFAULT ''")
+        _ensure_column(conn, "commercial_leads", "company_summary", "TEXT DEFAULT ''")
 
 
 def save_run_and_leads(
@@ -123,6 +125,7 @@ def save_run_and_leads(
                     company_id,
                     company_name,
                     company_website,
+                    company_summary,
                     cif,
                     region,
                     final_score,
@@ -139,10 +142,11 @@ def save_run_and_leads(
                     next_action,
                     commercial_pitch,
                     updated_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT(run_id, company_id, opportunity_id)
                 DO UPDATE SET
                     company_website=excluded.company_website,
+                    company_summary=excluded.company_summary,
                     final_score=excluded.final_score,
                     lead_tier=excluded.lead_tier,
                     suggested_contact_email=excluded.suggested_contact_email,
@@ -161,6 +165,7 @@ def save_run_and_leads(
                     lead.company.company_id,
                     lead.company.name,
                     lead.company.website or "",
+                    lead.company_summary or "",
                     lead.company.cif or "",
                     lead.company.region,
                     lead.final_score,
@@ -240,6 +245,7 @@ def get_leads_for_run(db_path: str | Path, run_id: str) -> list[dict[str, Any]]:
                 company_id,
                 company_name,
                 company_website,
+                company_summary,
                 cif,
                 region,
                 final_score,
