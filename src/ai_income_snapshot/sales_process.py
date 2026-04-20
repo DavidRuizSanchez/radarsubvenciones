@@ -52,6 +52,7 @@ def init_sales_db(db_path: str | Path) -> None:
                 company_name TEXT NOT NULL,
                 cif TEXT,
                 region TEXT,
+                website TEXT DEFAULT '',
                 final_score REAL NOT NULL,
                 lead_tier TEXT NOT NULL,
                 status TEXT NOT NULL DEFAULT 'NUEVO',
@@ -73,6 +74,11 @@ def init_sales_db(db_path: str | Path) -> None:
             )
             """
         )
+
+        # Migración ligera para bases ya existentes sin la columna website.
+        existing_columns = {row["name"] for row in conn.execute("PRAGMA table_info(commercial_leads)").fetchall()}
+        if "website" not in existing_columns:
+            conn.execute("ALTER TABLE commercial_leads ADD COLUMN website TEXT DEFAULT ''")
 
 
 def save_run_and_leads(
@@ -121,6 +127,7 @@ def save_run_and_leads(
                     company_name,
                     cif,
                     region,
+                    website,
                     final_score,
                     lead_tier,
                     status,
@@ -135,9 +142,10 @@ def save_run_and_leads(
                     next_action,
                     commercial_pitch,
                     updated_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT(run_id, company_id, opportunity_id)
                 DO UPDATE SET
+                    website=excluded.website,
                     final_score=excluded.final_score,
                     lead_tier=excluded.lead_tier,
                     suggested_contact_email=excluded.suggested_contact_email,
@@ -157,6 +165,7 @@ def save_run_and_leads(
                     lead.company.name,
                     lead.company.cif or "",
                     lead.company.region,
+                    lead.company.website or "",
                     lead.final_score,
                     lead.lead_tier,
                     "NUEVO",
@@ -235,6 +244,7 @@ def get_leads_for_run(db_path: str | Path, run_id: str) -> list[dict[str, Any]]:
                 company_name,
                 cif,
                 region,
+                website,
                 final_score,
                 lead_tier,
                 status,

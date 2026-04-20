@@ -30,21 +30,24 @@ class WebsiteSignalAnalyzer:
 
     def analyze(self, website_url: str | None) -> SignalAnalysis:
         if not website_url:
+            # Sin web → score neutral y excerpt vacío (no se cita en el pitch).
             return SignalAnalysis(
                 investment_signal_score=0.35,
                 matched_terms=[],
                 word_count=0,
-                sample_excerpt="Sin web en el CSV de entrada: score neutral por defecto.",
+                sample_excerpt="",
             )
 
         try:
-            html = self.http.get_text(website_url, headers={"User-Agent": "RadarCapitalPublico/0.1"}, retries=1)
-        except Exception as error:  # noqa: BLE001
+            html = self.http.get_text(website_url, retries=1)
+        except Exception:  # noqa: BLE001
+            # La web bloquea o no responde: score conservador y excerpt vacío
+            # para que el pitch comercial no cite el mensaje de error.
             return SignalAnalysis(
                 investment_signal_score=0.30,
                 matched_terms=[],
                 word_count=0,
-                sample_excerpt=f"No se pudo leer la web ({error}). Score conservador.",
+                sample_excerpt="",
             )
 
         visible_text = extract_visible_text(html)
