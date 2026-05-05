@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 class BDNSClient:
     def __init__(self, settings: Settings):
         self.settings = settings
+        self.vpd = settings.vpd
         self.http = SimpleHttpClient(timeout_seconds=settings.request_timeout_seconds)
 
     def _get(self, path: str, params: dict[str, Any]) -> dict[str, Any]:
@@ -32,7 +33,7 @@ class BDNSClient:
         page_size: int | None = None,
     ) -> dict[str, Any]:
         params = {
-            "vpd": self.settings.vpd,
+            "vpd": self.vpd,
             "page": page,
             "pageSize": page_size or self.settings.page_size,
             "descripcion": keyword,
@@ -54,7 +55,7 @@ class BDNSClient:
         page_size: int | None = None,
     ) -> dict[str, Any]:
         params = {
-            "vpd": self.settings.vpd,
+            "vpd": self.vpd,
             "page": page,
             "pageSize": page_size or self.settings.page_size,
             "descripcion": keyword,
@@ -108,7 +109,7 @@ class BDNSClient:
                         external_id=external_id,
                         title=title,
                         published_at=published_at,
-                        url=f"https://www.infosubvenciones.es/bdnstrans/GE/es/convocatoria/{external_id}",
+                        url=f"https://www.infosubvenciones.es/bdnstrans/{self.vpd}/es/convocatoria/{external_id}",
                         topic_tags=topic_tags,
                         region_hint=region_hint,
                     )
@@ -127,7 +128,7 @@ class BDNSClient:
             payload = self._get(
                 "concesiones/busqueda",
                 {
-                    "vpd": self.settings.vpd,
+                    "vpd": self.vpd,
                     "nifCif": clean_cif,
                     "page": 0,
                     "pageSize": 1,
@@ -152,20 +153,25 @@ class BDNSClient:
     ) -> list[Company]:
         companies_by_key: dict[str, Company] = {}
         normalized_region_filter = normalize_text(region_filter)
+        # NB: BDNS /concesiones/busqueda se cuelga si se le pasan fechaRegInicio/
+        # fechaRegFin (bug del backend, verificado mayo 2026). Pedimos por orden
+        # descendente de fechaConcesion y filtramos las fechas en cliente; cuando
+        # aparezca una concesión anterior al rango cortamos paginación.
 
         for keyword in keywords:
+            stop_keyword = False
             for page in range(self.settings.max_pages_per_keyword):
+                if stop_keyword:
+                    break
                 try:
                     payload = self._get(
                         "concesiones/busqueda",
                         {
-                            "vpd": self.settings.vpd,
+                            "vpd": self.vpd,
                             "page": page,
                             "pageSize": self.settings.page_size,
                             "descripcion": keyword,
                             "descripcionTipoBusqueda": 2,
-                            "fechaRegInicio": to_ddmmyyyy(start_date.isoformat()),
-                            "fechaRegFin": to_ddmmyyyy(end_date.isoformat()),
                             "order": "fechaConcesion",
                             "direccion": "desc",
                         },
@@ -181,6 +187,21 @@ class BDNSClient:
 
                 records = payload.get("content", [])
                 for record in records:
+                    raw_fecha = record.get("fechaConcesion")
+                    if raw_fecha:
+                        try:
+                            fecha_concesion = date.fromisoformat(raw_fecha)
+                        except ValueError:
+                            fecha_concesion = None
+                        if fecha_concesion is not None:
+                            if fecha_concesion > end_date:
+                                # Demasiado reciente para la ventana pedida.
+                                continue
+                            if fecha_concesion < start_date:
+                                # Como vienen DESC, ya nada útil más adelante.
+                                stop_keyword = True
+                                break
+
                     discovered = _company_from_concesion_record(record)
                     if discovered is None:
                         continue

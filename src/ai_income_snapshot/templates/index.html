@@ -610,6 +610,9 @@
             <div class="field">
               <label for="discovery_region_filter">Filtro región (opcional)</label>
               <input id="discovery_region_filter" name="discovery_region_filter" type="text" value="{{ form_data.discovery_region_filter }}" />
+              <small style="color: var(--ink-soft); margin-top: 4px;">
+                BDNS estatal ya incluye concesiones autonómicas. Usa este campo para filtrar por CCAA (ej: "cataluña", "madrid").
+              </small>
             </div>
 
             <div class="field" style="grid-column: 1 / -1;">
@@ -641,6 +644,7 @@
         <h2>Proceso comercial</h2>
 
         <form method="get" style="display: flex; gap: 10px; align-items: end; flex-wrap: wrap;">
+          <input type="hidden" name="email_filter" value="{{ email_filter }}" />
           <div class="field" style="flex: 1; min-width: 280px;">
             <label for="run_id">Run a gestionar</label>
             <select id="run_id" name="run_id" onchange="this.form.submit()">
@@ -691,6 +695,28 @@
         </div>
 
         <h3>Leads y gestión diaria</h3>
+        <form method="get" class="email-filter" style="display: flex; gap: 14px; margin-bottom: 8px; flex-wrap: wrap; align-items: center;">
+          <input type="hidden" name="run_id" value="{{ selected_run_id }}" />
+          <span style="color: var(--ink-soft); font-size: 13px;">Filtrar:</span>
+          <label style="font-weight: normal; margin: 0;">
+            <input type="radio" name="email_filter" value="all"
+                   {% if email_filter == 'all' %}checked{% endif %}
+                   onchange="this.form.submit()" />
+            Todos ({{ email_counts.all }})
+          </label>
+          <label style="font-weight: normal; margin: 0;">
+            <input type="radio" name="email_filter" value="with"
+                   {% if email_filter == 'with' %}checked{% endif %}
+                   onchange="this.form.submit()" />
+            Con email ({{ email_counts['with'] }})
+          </label>
+          <label style="font-weight: normal; margin: 0;">
+            <input type="radio" name="email_filter" value="without"
+                   {% if email_filter == 'without' %}checked{% endif %}
+                   onchange="this.form.submit()" />
+            Sin email ({{ email_counts['without'] }})
+          </label>
+        </form>
         <div style="display: flex; gap: 10px; margin-bottom: 8px; flex-wrap: wrap;">
           <button type="button" class="button-ghost button-small" id="expand-all">Desplegar todos</button>
           <button type="button" class="button-ghost button-small" id="collapse-all">Colapsar todos</button>

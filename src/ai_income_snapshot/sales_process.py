@@ -235,10 +235,21 @@ def get_run(db_path: str | Path, run_id: str) -> dict[str, Any] | None:
     return dict(row) if row else None
 
 
-def get_leads_for_run(db_path: str | Path, run_id: str) -> list[dict[str, Any]]:
+def get_leads_for_run(
+    db_path: str | Path,
+    run_id: str,
+    email_filter: str = "all",
+) -> list[dict[str, Any]]:
+    where = "run_id = ?"
+    params: list[Any] = [run_id]
+    if email_filter == "with":
+        where += " AND suggested_contact_email IS NOT NULL AND TRIM(suggested_contact_email) <> ''"
+    elif email_filter == "without":
+        where += " AND (suggested_contact_email IS NULL OR TRIM(suggested_contact_email) = '')"
+
     with _connect(db_path) as conn:
         rows = conn.execute(
-            """
+            f"""
             SELECT
                 id,
                 run_id,
@@ -266,13 +277,35 @@ def get_leads_for_run(db_path: str | Path, run_id: str) -> list[dict[str, Any]]:
                 next_follow_up_date,
                 updated_at
             FROM commercial_leads
-            WHERE run_id = ?
+            WHERE {where}
             ORDER BY final_score DESC, id ASC
             """,
-            (run_id,),
+            params,
         ).fetchall()
 
     return [dict(row) for row in rows]
+
+
+def count_leads_email_buckets(db_path: str | Path, run_id: str) -> dict[str, int]:
+    with _connect(db_path) as conn:
+        row = conn.execute(
+            """
+            SELECT
+                COUNT(*) AS total,
+                SUM(
+                    CASE
+                        WHEN suggested_contact_email IS NOT NULL AND TRIM(suggested_contact_email) <> ''
+                        THEN 1 ELSE 0
+                    END
+                ) AS with_email
+            FROM commercial_leads
+            WHERE run_id = ?
+            """,
+            (run_id,),
+        ).fetchone()
+    total = (row["total"] if row else 0) or 0
+    with_email = (row["with_email"] if row else 0) or 0
+    return {"all": total, "with": with_email, "without": total - with_email}
 
 
 def update_lead_progress(

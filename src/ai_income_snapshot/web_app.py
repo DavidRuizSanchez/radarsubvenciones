@@ -12,6 +12,7 @@ from .pipeline import RadarCapitalPipeline
 from .sales_process import (
     CHANNEL_OPTIONS,
     STATUS_OPTIONS,
+    count_leads_email_buckets,
     funnel_stats,
     get_leads_for_run,
     get_run,
@@ -23,6 +24,7 @@ from .sales_process import (
 
 ALLOWED_OUTPUT_FILES = {"leads.csv", "resumen.md", "boletines_signals.csv"}
 SALES_DB_PATH = Path("data/sales_pipeline.db")
+EMAIL_FILTER_VALUES = {"all", "with", "without"}
 
 
 def create_app() -> Flask:
@@ -34,15 +36,7 @@ def create_app() -> Flask:
 
     @app.route("/", methods=["GET", "POST"])
     def index() -> str:
-        form_data = {
-            "companies_path": "data/clientes_produccion_template.csv",
-            "output_dir": "outputs",
-            "calibration_file": "config/calibracion_despacho.json",
-            "topics": "",
-            "auto_discover_companies": "1",
-            "max_discovered_companies": "100",
-            "discovery_region_filter": "",
-        }
+        form_data = _default_pipeline_form()
 
         context = {
             "form_data": form_data,
@@ -56,10 +50,16 @@ def create_app() -> Flask:
             "funnel": None,
             "status_options": STATUS_OPTIONS,
             "channel_options": CHANNEL_OPTIONS,
+            "email_filter": "all",
+            "email_counts": {"all": 0, "with": 0, "without": 0},
         }
 
         sales_db = app.config["SALES_DB_PATH"]
         selected_run_id = (request.args.get("run_id") or "").strip()
+        email_filter = (request.args.get("email_filter") or "all").strip()
+        if email_filter not in EMAIL_FILTER_VALUES:
+            email_filter = "all"
+        context["email_filter"] = email_filter
 
         if request.method == "POST":
             action = (request.form.get("action") or "run_pipeline").strip()
@@ -128,7 +128,8 @@ def create_app() -> Flask:
                     {"filename": filename, "run_id": selected_run_id}
                     for filename in sorted(ALLOWED_OUTPUT_FILES)
                 ]
-                context["leads"] = get_leads_for_run(sales_db, selected_run_id)
+                context["leads"] = get_leads_for_run(sales_db, selected_run_id, email_filter)
+                context["email_counts"] = count_leads_email_buckets(sales_db, selected_run_id)
                 context["funnel"] = funnel_stats(sales_db, selected_run_id)
 
         return render_template("index.html", **context)
