@@ -1,0 +1,46 @@
+# Secrets / env
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# Virtualenv
+.venv/
+venv/
+env/
+ENV/
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs / data local
+*.log
+*.sqlite
+*.sqlite3
+*.db
+data/local/
+data/raw/
+outputs/
+
+# Tests / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
